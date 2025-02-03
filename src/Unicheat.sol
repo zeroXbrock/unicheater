@@ -15,7 +15,19 @@ interface IUniswapV2Router02 {
     ) external returns (uint256[] memory amounts);
 }
 
-contract Unicheat {
+interface IUniswapV3Pool {
+    function initialize(uint160 sqrtPriceX96) external;
+}
+
+interface IUniswapV3Factory {
+    function getPool(
+        address tokenA,
+        address tokenB,
+        uint24 fee
+    ) external view returns (address pool);
+}
+
+contract UnicheatV2 {
     address public router;
 
     constructor(address _router) {
@@ -37,5 +49,19 @@ contract Unicheat {
             address(this),
             block.timestamp + 100
         );
+    }
+}
+
+contract UnicheatV3 {
+    address public factory;
+
+    constructor(address _factory) {
+        factory = _factory;
+    }
+
+    /** Calls `initialize` on the pool for the given tokens with a 1:1 price ratio. */
+    function initPool(address tokenA, address tokenB, uint24 fee) public {
+        address pool = IUniswapV3Factory(factory).getPool(tokenA, tokenB, fee);
+        IUniswapV3Pool(pool).initialize(79228162514264337593543950336);
     }
 }
