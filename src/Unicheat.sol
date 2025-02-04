@@ -3,6 +3,11 @@ pragma solidity ^0.8.23;
 
 interface ERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 }
 
 /* Uniswap V2 */
@@ -147,6 +152,14 @@ contract UnicheatV3 {
 
     /** Calls `exactInputSingle` on UniV3Router, using this contract's token balances. */
     function swap(ExactInputSingleParams calldata params) public {
-        IUniswapV3Router(router).exactInputSingle(params);
+        uint256 amountOut = IUniswapV3Router(router).exactInputSingle(params);
+        if (params.recipient != address(this)) {
+            // transfer the output token from the recipient back to this contract
+            ERC20(params.tokenOut).transferFrom(
+                params.recipient,
+                address(this),
+                amountOut
+            );
+        }
     }
 }
